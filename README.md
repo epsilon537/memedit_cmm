@@ -17,7 +17,7 @@ The usual file navigation with cursors keys, page up&down, home, end, etc. shoul
 
 MemEdit is a full-screen console-only editor. I does not work over serial, sorry.
 
-The starting address to view can be passed in as a command line argument, e.g. run memedit MM.INFO(PROGRAM)
+The starting address to view can be passed in as a command line argument, e.g. *memedit MM.INFO(PROGRAM)
 
 Commands such as goto and fill accept MMBasic syntax for address specifications, e.g. Go To Address (MMBasic syntax): MM.INFO(PAGE ADDRESS 0)
 
