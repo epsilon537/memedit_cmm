@@ -3,7 +3,27 @@ OPTION DEFAULT NONE
 OPTION BASE 0
 OPTION CONSOLE SCREEN
 
-CONST VERSION$ = "0.1"
+CONST VERSION$ = "0.2"
+
+'--> Mapped address ranges: Can be referenced in goto command.
+CONST SRAM% = &H38000000
+CONST SRAM_END% = &H38010000 - 256
+
+CONST RAM1% = &H30000000
+CONST RAM1_END% = &H30040000 - 256
+
+CONST RAM2% = &H40000000
+CONST RAM2_END% = &H59000000
+
+CONST AXI_RAM% =     &H24000000
+CONST AXI_RAM_END% = &H24080000
+
+CONST ROM1% = &H08000000
+CONST ROM1_END% = &H08200000
+CONST ROM2% = &H10000000
+CONST ROM2_END% = &H20000000
+'<--
+
 
 CONST NUM_BYTES_PER_ROW% = 16
 
@@ -537,10 +557,15 @@ SUB drawCharAtCursor(invert%)
   PRINT @(crsrScrnXpos%*MM.INFO(FONTWIDTH), crsrScrnYpos%*MM.INFO(FONTHEIGHT), invertl%) char$;
 END SUB
 
+'Helper for showHelpPopup below
+SUB newline(y%)
+  y% = y% + MM.INFO(FONTHEIGHT)
+END SUB
+
 'help popup is prepared on a separate page in a Box, then shown on page 0 using a sprite.
 SUB showHelpPopup
-  LOCAL longestStringLen% = LEN("Home 1x = Go To Top of Page")
-  LOCAL numLines% = 13
+  LOCAL longestStringLen% = LEN("Any MMBasic expression evaluating to a valid address should work.")
+  LOCAL numLines% = 25
   LOCAL boxWidth% = (longestStringLen%+4)*MM.INFO(FONTWIDTH)
   LOCAL boxHeight% = (numLines%+4)*MM.INFO(FONTHEIGHT)
 
@@ -550,35 +575,38 @@ SUB showHelpPopup
   LOCAL x% = 2*MM.INFO(FONTWIDTH)
   LOCAL y% = 2*MM.INFO(FONTHEIGHT)
 
-  PRINT @(x%,y%,2) "    Help - Key Bindings";
-  y% = y% + 2*MM.INFO(FONTHEIGHT)
-                    
-  PRINT @(x%,y%,2) "F1 = Help";
-  y% = y% + MM.INFO(FONTHEIGHT)
-  PRINT @(x%,y%,2) "Ctrl-Q = Quit";
-  y% = y% + MM.INFO(FONTHEIGHT)
-  PRINT @(x%,y%,2) "Ctrl-E = Export";
-  y% = y% + MM.INFO(FONTHEIGHT)
-  PRINT @(x%,y%,2) "Ctrl-F = Fill";
-  y% = y% + MM.INFO(FONTHEIGHT)
-  PRINT @(x%,y%,2) "Ctrl-G = Goto";
-  y% = y% + MM.INFO(FONTHEIGHT)
-  PRINT @(x%,y%,2) "Ctrl-P = Screenshot";
-  y% = y% + MM.INFO(FONTHEIGHT)
-  PRINT @(x%,y%,2) "Ctrl-T = Toggle Word Size";
-  y% = y% + MM.INFO(FONTHEIGHT)
-  PRINT @(x%,y%,2) "Home = Go To Top of Page";
-  y% = y% + MM.INFO(FONTHEIGHT)
-  PRINT @(x%,y%,2) "End = Go To End of Page";
-  y% = y% + MM.INFO(FONTHEIGHT)
-  PRINT @(x%,y%,2) "PgUp = Move one Page Up";
-  y% = y% + MM.INFO(FONTHEIGHT)
-  PRINT @(x%,y%,2) "PgDn = Move one Page Down";
+  PRINT @(x%,y%,2) "Help - Key Bindings:"; : newline y%
+  newline y%                  
+  PRINT @(x%,y%,2) "F1 = Help"; : newline y%
+  PRINT @(x%,y%,2) "Ctrl-Q = Quit"; : newline y%
+  PRINT @(x%,y%,2) "Ctrl-E = Export"; : newline y%
+  PRINT @(x%,y%,2) "Ctrl-F = Fill"; : newline y%
+  PRINT @(x%,y%,2) "Ctrl-G = Goto"; : newline y%
+  PRINT @(x%,y%,2) "Ctrl-P = Screenshot"; : newline y%
+  PRINT @(x%,y%,2) "Ctrl-T = Toggle Word Size"; : newline y%
+  PRINT @(x%,y%,2) "Home = Go To Top of Page"; : newline y%
+  PRINT @(x%,y%,2) "End = Go To End of Page"; : newline y%
+  PRINT @(x%,y%,2) "PgUp = Move one Page Up"; : newline y%
+  PRINT @(x%,y%,2) "PgDn = Move one Page Down"; : newline y%
+  newline y%
+  PRINT @(x%,y%,2) "Any MMBasic expression evaluating to a valid address should work."; : newline y%
+  PRINT @(x%,y%,2) "E.g. Ctrl-G -> MM.INFO(PAGE ADDRESS 0)"; : newline y%
+  newline y%
+
+  PRINT @(x%,y%,2) "The following address ranges are mapped and can be accessed using"; : newline y% 
+  PRINT @(x%,y%,2) "constants below:"; : newline y%
+  newline y%
+  PRINT @(x%,y%,2) "SRAM% =     &H" + HEX$(SRAM%,8)        + "  SRAM_END% =    &H" + HEX$(SRAM_END%,8) : newline y%
+  PRINT @(x%,y%,2) "RAM1% =     &H" + HEX$(RAM1%,8)        + "  RAM1_END% =    &H" + HEX$(RAM1_END%,8) : newline y%
+  PRINT @(x%,y%,2) "RAM2% =     &H" + HEX$(RAM2%,8)        + "  RAM2_END% =    &H" + HEX$(RAM2_END%,8) : newline y%
+  PRINT @(x%,y%,2) "AXI_SRAM% = &H" + HEX$(AXI_RAM%,8)     + "  AXI_RAM_END% = &H" + HEX$(AXI_RAM_END%,8) : newline y%
+  PRINT @(x%,y%,2) "ROM1% =     &H" + HEX$(ROM1%,8)        + "  ROM1_END% =    &H" + HEX$(ROM1_END%,8) : newline y%
+  PRINT @(x%,y%,2) "ROM2% =     &H" + HEX$(ROM2%,8)        + "  ROM2_END% =    &H" + HEX$(ROM2_END%,8) : newline y%
 
   PAGE WRITE 0
 
   SPRITE READ 1, 0 , 0, boxWidth%, boxHeight%, 2
-  SPRITE SHOW 1, MM.HRES/2 - boxWidth%/2, MM.VRES/2 - boxHeight%/2, 1
+  SPRITE SHOW 1, MM.HRES\2 - boxWidth%\2, MM.VRES\2 - boxHeight%\2, 1
 END SUB
 
 SUB removeHelpPopup
